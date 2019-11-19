@@ -13,6 +13,7 @@ import base64
 import os
 import sys
 import zlib
+import shutil
 
 try:
    import cPickle as pickle
@@ -352,12 +353,12 @@ class TkGeometryNodeHandler(object):
     # returns a list of menu items for the current node
     def get_output_path_menu_items(self):
 
-        menu = ["sgtk"]
         current_node = hou.pwd()
 
         # attempt to compute the output path and add it as an item in the menu
         try:
-            menu.append(self._compute_output_path(current_node))
+            path = self._compute_output_path(current_node)
+            menu = [path, path]
         except sgtk.TankError as e:
             error_msg = ("Unable to construct the output path menu items: " 
                          "%s - %s" % (current_node.name(), e))
@@ -394,7 +395,6 @@ class TkGeometryNodeHandler(object):
 
     # refresh the output profile path
     def refresh_output_path(self, node):
-
         output_path_parm = node.parm(self.NODE_OUTPUT_PATH_PARM)
         output_path_parm.set(output_path_parm.eval())
 
@@ -474,12 +474,70 @@ class TkGeometryNodeHandler(object):
             # ingore any errors. ex: metrics logging not supported
             pass
 
+    # write backup file
+    def create_backup_file(self, node):
+
+        backup_path = self._compute_backup_output_path(node)
+
+        # Create dir if it doesn't exist
+        backup_dir_path = os.path.dirname(backup_path)
+        if not os.path.exists(backup_dir_path):
+            os.makedirs(backup_dir_path)
+
+        # write backup hip
+        hou.hipFile.save(file_name=None, save_to_recent_files=True)
+
+        shutil.copy2(hou.hipFile.path(), backup_path)
+        self._app.log_debug("Created backup file for %s" % node.name())
+
+    def get_backup_file(self, node):
+        
+        backup_path = self._compute_backup_output_path(node)
+
+        # check if backup file exists
+        if os.path.exists(backup_path):
+            return backup_path
+        else:
+            self._app.log_warning("Could not find backup hip file for %s" % node.path())
+
+    def auto_version(self, node):
+
+        # get relevant fields from the current file path
+        work_file_fields = self._get_hipfile_fields()
+
+        output_profile = self._get_output_profile(node)
+        output_cache_template = self._app.get_template_by_name(
+            output_profile["output_cache_template"])
+
+        # Get the type of output
+        type_parm = node.parm('types')
+        extension = type_parm.menuLabels()[type_parm.evalAsInt()]
+
+        fields = {
+            "name": work_file_fields.get("name", None),
+            "node": node.name(),
+            "ext": extension,
+            "SEQ": "FORMAT: $F"
+        }
+
+        fields.update(self._app.context.as_template_fields(
+            output_cache_template))
+
+        max_version = 0
+        for caches in self._app.sgtk.abstract_paths_from_template(output_cache_template, fields):
+            fields = output_cache_template.get_fields(caches)
+            if fields['version'] > max_version:
+                max_version = fields['version']
+        
+        node.parm('ver').set(max_version + 1)
+
+
 
     ############################################################################
     # Private methods
 
-    # compute the output path based on the current work file and cache template
-    def _compute_output_path(self, node):
+    # compute the output path based on the current work file and backup template
+    def _compute_backup_output_path(self, node):
 
         # get relevant fields from the current file path
         work_file_fields = self._get_hipfile_fields()
@@ -488,36 +546,21 @@ class TkGeometryNodeHandler(object):
             msg = "This Houdini file is not a Shotgun Toolkit work file!"
             raise sgtk.TankError(msg)
 
-        output_profile = self._get_output_profile(node)
-
-        if node.evalParm('shared_out'):
-            output_cache_template = self._app.get_template_by_name(
-                output_profile["output_cache_shared_template"])
-        else:
-            # Get the cache templates from the app
-            output_cache_template = self._app.get_template_by_name(
-                output_profile["output_cache_template"])
-
         # Get the type of output
-        extension = node.evalParm('types')
-        types = {0: 'bgeo.sc',
-                 1: 'obj',
-                 2: 'bgeo',
-                 3: 'vdb',}
+        type_parm = node.parm('types')
+        extension = type_parm.menuLabels()[type_parm.evalAsInt()]
 
         # create fields dict with all the metadata
         fields = {
             "name": work_file_fields.get("name", None),
             "node": node.name(),
-            "renderpass": node.name(),
-            "version": work_file_fields.get("version", None),
-            "geo.ext": types[extension]
+            "version": node.parm('ver').evalAsInt(),
+            "ext": extension,
         }
-
-        if node.evalParm('seq') == 1:
-            fields["SEQ"] = "FORMAT: $F"
-        else:
-            fields["SEQ"] = None
+        
+        output_profile = self._get_output_profile(node)
+        output_cache_template = self._app.get_template_by_name(
+                        output_profile["output_backup_template"])
 
         fields.update(self._app.context.as_template_fields(
             output_cache_template))
@@ -525,6 +568,50 @@ class TkGeometryNodeHandler(object):
         path = output_cache_template.apply_fields(fields)
         path = path.replace(os.path.sep, "/")
 
+        return path
+
+    # compute the output path based on the current work file and cache template
+    def _compute_output_path(self, node):
+
+
+        # get relevant fields from the current file path
+        work_file_fields = self._get_hipfile_fields()
+
+        if not work_file_fields:
+            msg = "This Houdini file is not a Shotgun Toolkit work file!"
+            raise sgtk.TankError(msg)
+
+        # Get the type of output
+        type_parm = node.parm('types')
+        extension = type_parm.menuLabels()[type_parm.evalAsInt()]
+
+        # create fields dict with all the metadata
+        fields = {
+            "name": work_file_fields.get("name", None),
+            "node": node.name(),
+            "version": node.parm('ver').evalAsInt(),
+            "ext": extension,
+            "SEQ": "FORMAT: $F",
+            "output_profile": self._get_output_profile(node)
+        }
+
+        # cache fields to accelerate path creation
+        cachedFields = node.cachedUserData('fields')
+        if cachedFields != fields:
+            node.setCachedUserData('fields', fields.copy())
+        else:
+            return node.cachedUserData('pathCache')
+
+        output_cache_template = self._app.get_template_by_name(
+                        fields["output_profile"]["output_cache_template"])
+
+        fields.update(self._app.context.as_template_fields(
+            output_cache_template))
+
+        path = output_cache_template.apply_fields(fields)
+        path = path.replace(os.path.sep, "/")
+
+        node.setCachedUserData('pathCache', path)
         return path
 
 

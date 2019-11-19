@@ -76,14 +76,14 @@ configuration:
                     description: >
                         A reference to a template which defines where the
                         geometry cache will be written to disk.
-                    fields: context, version, [name], [node]
+                    fields: context, version, [name], [node], [ext]
 
-                output_cache_shared_template:
+                output_backup_template:
                     type: template
                     description: >
                         A reference to a template which defines where the
-                        geometry cache will be written to disk at SHARED location.
-                    fields: context, version, [name], [node]
+                        backup hip file will be written to disk.
+                    fields: context, version, [name], [node], [ext]
 
 
 # the Shotgun fields that this app needs in order to operate correctly
