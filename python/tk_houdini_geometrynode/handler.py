@@ -573,6 +573,12 @@ class TkGeometryNodeHandler(object):
 
         node.parm('seqlabel').set(returnStr)
 
+    def get_output_template(self, node):
+        output_profile = self._get_output_profile(node)
+        output_cache_template = self._app.get_template_by_name(output_profile["output_cache_template"])
+
+        return output_cache_template
+
 
 
     ############################################################################
