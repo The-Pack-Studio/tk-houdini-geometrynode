@@ -403,6 +403,8 @@ class TkGeometryNodeHandler(object):
         output_path_parm = node.parm(self.NODE_OUTPUT_PATH_PARM)
         output_path_parm.set(output_path_parm.eval())
 
+        self.check_seq(node)
+
     # open a file browser showing the render path of the current node
     def show_in_fs(self):
 
@@ -539,8 +541,9 @@ class TkGeometryNodeHandler(object):
 
     def check_seq(self, node):
         path = self._compute_output_path(node)
+        node_color = hou.Color((0, 0.8, 0))
 
-        returnStr = None
+        return_str = None
         if '$F4' in path:
             path = path.replace('$F4', '*')
             sequences = pyseq.get_sequences(path)
@@ -550,30 +553,37 @@ class TkGeometryNodeHandler(object):
 
                 if seq:
                     if seq.missing():
-                        returnStr = '[%s-%s], missing %s' % (seq.format('%s'), seq.format('%e'), seq.format('%m'))
+                        return_str = '[%s-%s], missing %s' % (seq.format('%s'), seq.format('%e'), seq.format('%m'))
                     else:
-                        returnStr = seq.format('%R')
+                        return_str = seq.format('%R')
+
+                    node_color = hou.Color((0.8, 0, 0))
                 else:
-                    returnStr = 'Invalid Sequence Object!'
+                    return_str = 'Invalid Sequence Object!'
             else:
-                returnStr = 'No or multiple sequences detected!'
+                return_str = 'No or multiple sequences detected!'
         elif path.split('.')[-1] == 'abc':
             if os.path.exists(path):
                 abcRange = abc.alembicTimeRange(path)
                         
                 if abcRange:
-                    returnStr = '[%s-%s] - ABC Archive' % (int(abcRange[0] * hou.fps()), int(abcRange[1] * hou.fps()))
+                    return_str = '[%s-%s] - ABC Archive' % (int(abcRange[0] * hou.fps()), int(abcRange[1] * hou.fps()))
                 else:
-                    returnStr = 'Single Abc'
+                    return_str = 'Single Abc'
+                
+                node_color = hou.Color((0.8, 0, 0))
             else:
-                returnStr = 'No Cache!'
+                return_str = 'No Cache!'
         else:
             if os.path.exists(path):
-                returnStr = 'Single Frame'
-            else:
-                returnStr = 'No Cache!'
+                return_str = 'Single Frame'
 
-        node.parm('seqlabel').set(returnStr)
+                node_color = hou.Color((0.8, 0, 0))
+            else:
+                return_str = 'No Cache!'
+
+        node.setColor(node_color)
+        node.parm('seqlabel').set(return_str)
 
     def get_output_template(self, node):
         output_profile = self._get_output_profile(node)
