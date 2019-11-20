@@ -22,6 +22,11 @@ except:
 
 # houdini
 import hou
+import _alembic_hom_extensions as abc
+
+# import pyseq
+sys.path.append(r'\\server01\shared\sharedPython\modules\pyseq')
+import pyseq
 
 # toolkit
 import sgtk
@@ -530,6 +535,43 @@ class TkGeometryNodeHandler(object):
                 max_version = fields['version']
         
         node.parm('ver').set(max_version + 1)
+
+
+    def check_seq(self, node):
+        path = self._compute_output_path(node)
+
+        returnStr = None
+        if '$F4' in path:
+            path = path.replace('$F4', '*')
+            sequences = pyseq.get_sequences(path)
+
+            if sequences:
+                if len(sequences) == 1:
+                    seq = sequences[0]
+
+                    if seq:
+                        if seq.missing():
+                            returnStr = '[%s-%s], missing %s' % (seq.format('%s'), seq.format('%e'), seq.format('%m'))
+                        else:
+                            returnStr = seq.format('%R')
+                    else:
+                        returnStr = 'Invalid Sequence Object!'
+                else:
+                    returnStr = 'No or multiple sequences detected!'
+        elif path.split('.')[-1] == 'abc':
+            abcRange = abc.alembicTimeRange(path)
+					
+            if abcRange:
+                returnStr = '[%s-%s] - ABC Archive' % (int(abcRange[0] * hou.fps()), int(abcRange[1] * hou.fps()))
+            else:
+                returnStr = 'Single Abc'
+        else:
+            if os.path.exists(path):
+                returnStr = 'Single Frame'
+            else:
+                returnStr = 'No Cache!'
+
+        node.parm('seqlabel').set(returnStr)
 
 
 
