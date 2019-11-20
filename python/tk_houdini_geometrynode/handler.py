@@ -545,26 +545,28 @@ class TkGeometryNodeHandler(object):
             path = path.replace('$F4', '*')
             sequences = pyseq.get_sequences(path)
 
-            if sequences:
-                if len(sequences) == 1:
-                    seq = sequences[0]
+            if len(sequences) == 1:
+                seq = sequences[0]
 
-                    if seq:
-                        if seq.missing():
-                            returnStr = '[%s-%s], missing %s' % (seq.format('%s'), seq.format('%e'), seq.format('%m'))
-                        else:
-                            returnStr = seq.format('%R')
+                if seq:
+                    if seq.missing():
+                        returnStr = '[%s-%s], missing %s' % (seq.format('%s'), seq.format('%e'), seq.format('%m'))
                     else:
-                        returnStr = 'Invalid Sequence Object!'
+                        returnStr = seq.format('%R')
                 else:
-                    returnStr = 'No or multiple sequences detected!'
-        elif path.split('.')[-1] == 'abc':
-            abcRange = abc.alembicTimeRange(path)
-					
-            if abcRange:
-                returnStr = '[%s-%s] - ABC Archive' % (int(abcRange[0] * hou.fps()), int(abcRange[1] * hou.fps()))
+                    returnStr = 'Invalid Sequence Object!'
             else:
-                returnStr = 'Single Abc'
+                returnStr = 'No or multiple sequences detected!'
+        elif path.split('.')[-1] == 'abc':
+            if os.path.exists(path):
+                abcRange = abc.alembicTimeRange(path)
+                        
+                if abcRange:
+                    returnStr = '[%s-%s] - ABC Archive' % (int(abcRange[0] * hou.fps()), int(abcRange[1] * hou.fps()))
+                else:
+                    returnStr = 'Single Abc'
+            else:
+                returnStr = 'No Cache!'
         else:
             if os.path.exists(path):
                 returnStr = 'Single Frame'
