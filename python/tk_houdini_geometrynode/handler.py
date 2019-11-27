@@ -467,11 +467,6 @@ class TkGeometryNodeHandler(object):
 
     # called when the node is created.
     def setup_node(self, node):
-
-        default_name = self._app.get_setting('default_node_name')
-
-        node.setName(default_name, unique_name=True)
-
         # apply the default profile
         self.set_profile(node)
 

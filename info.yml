@@ -13,15 +13,6 @@
 
 # expected fields in the configuration file for this app
 configuration:
-
-    default_node_name:
-        type: str
-        description: >
-            A default name for Geometry output nodes created in houdini.
-            Allowed characters include letters, numbers, periods, dashes, or
-            underscores.
-        default_value: sgtk_geometry
-
     work_file_template:
         type: template
         description: >
