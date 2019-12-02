@@ -368,7 +368,8 @@ class TkGeometryNodeHandler(object):
             error_msg = ("Unable to construct the output path menu items: " 
                          "%s - %s" % (current_node.name(), e))
             self._app.log_error(error_msg)
-            menu.append("ERROR: %s" % (error_msg,))
+            menu_str = "ERROR: %s" % error_msg
+            menu = [menu_str, menu_str]
 
         return menu
 
