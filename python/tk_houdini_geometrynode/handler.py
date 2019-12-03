@@ -656,6 +656,7 @@ class TkGeometryNodeHandler(object):
         if cachedFields != fields:
             node.setCachedUserData('fields', fields.copy())
         else:
+            print 'Used cached path cache'
             return node.cachedUserData('pathCache')
 
         output_cache_template = self._app.get_template_by_name(
