@@ -25,7 +25,6 @@ import hou
 import _alembic_hom_extensions as abc
 
 # import pyseq
-sys.path.append(r'\\server01\shared\sharedPython\modules\pyseq')
 import pyseq
 
 # toolkit
