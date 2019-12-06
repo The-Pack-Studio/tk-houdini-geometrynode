@@ -686,13 +686,22 @@ class TkGeometryNodeHandler(object):
 
     # extract fields from current Houdini file using the workfile template
     def _get_hipfile_fields(self):
-        current_file_path = hou.hipFile.path()
+        work_file_path = ''
+        if hou.isUIAvailable():
+            work_file_path = hou.hipFile.path()
+        # Exeption for when we are on the render farm and using the backup hip
+        else:
+            env_hip = os.getenv('NOZ_HIPFILE')
+            if env_hip:
+                work_file_path = env_hip
+            else:
+                print 'Could not find origin hip file!'
 
         work_fields = {}
         work_file_template = self._app.get_template("work_file_template")
         if (work_file_template and 
-            work_file_template.validate(current_file_path)):
-            work_fields = work_file_template.get_fields(current_file_path)
+            work_file_template.validate(work_file_path)):
+            work_fields = work_file_template.get_fields(work_file_path)
 
         return work_fields
 
