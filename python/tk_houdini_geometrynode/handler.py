@@ -317,10 +317,8 @@ class TkGeometryNodeHandler(object):
     def copy_path_to_clipboard(self):
 
         render_path = self._get_render_path(hou.pwd())
-
-        # use Qt to copy the path to the clipboard:
-        from sgtk.platform.qt import QtGui
-        QtGui.QApplication.clipboard().setText(render_path)
+        render_path = render_path.replace('/', os.sep)
+        hou.ui.copyTextToClipboard(render_path)
 
         self._app.log_debug(
             "Copied render path to clipboard: %s" % (render_path,))
@@ -478,7 +476,6 @@ class TkGeometryNodeHandler(object):
 
     # write backup file
     def create_backup_file(self, node):
-
         backup_path = self._compute_backup_output_path(node)
 
         # Create dir if it doesn't exist
