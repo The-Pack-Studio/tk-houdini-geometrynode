@@ -462,7 +462,6 @@ class TkGeometryNodeHandler(object):
                 msg = "Failed to launch '%s'!" % (cmd,)
                 hou.ui.displayMessage(msg)
 
-
     # called when the node is created.
     def setup_node(self, node):
         # apply the default profile
@@ -490,7 +489,6 @@ class TkGeometryNodeHandler(object):
         self._app.log_debug("Created backup file for %s" % node.name())
 
     def get_backup_file(self, node):
-        
         backup_path = self._compute_backup_output_path(node)
 
         # check if backup file exists
@@ -500,7 +498,6 @@ class TkGeometryNodeHandler(object):
             self._app.log_warning("Could not find backup hip file for %s" % node.path())
 
     def auto_version(self, node):
-
         # get relevant fields from the current file path
         work_file_fields = self._get_hipfile_fields()
 
@@ -530,6 +527,14 @@ class TkGeometryNodeHandler(object):
         
         node.parm('ver').set(max_version + 1)
 
+        # Create folder to 'reserve' cache version
+        path = self._compute_output_path(node)
+
+        if path:
+            dir_path = os.path.dirname(path)
+            
+            if not os.path.exists(path):
+                os.makedirs(dir_path)
 
     def check_seq(self, node):
         path = self._compute_output_path(node)
@@ -624,8 +629,6 @@ class TkGeometryNodeHandler(object):
 
     # compute the output path based on the current work file and cache template
     def _compute_output_path(self, node):
-
-
         # get relevant fields from the current file path
         work_file_fields = self._get_hipfile_fields()
 
@@ -665,7 +668,6 @@ class TkGeometryNodeHandler(object):
 
         node.setCachedUserData('pathCache', path)
         return path
-
 
     # get the current output profile
     def _get_output_profile(self, node=None):
