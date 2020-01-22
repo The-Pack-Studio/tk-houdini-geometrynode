@@ -315,7 +315,6 @@ class TkGeometryNodeHandler(object):
 
     # copy the render path for the current node to the clipboard
     def copy_path_to_clipboard(self):
-
         render_path = self._get_render_path(hou.pwd())
         render_path = render_path.replace('/', os.sep)
         hou.ui.copyTextToClipboard(render_path)
@@ -323,10 +322,8 @@ class TkGeometryNodeHandler(object):
         self._app.log_debug(
             "Copied render path to clipboard: %s" % (render_path,))
 
-
     # create an Geometry node, set the path to the output path of current node
     def create_geometry_node(self):
-
         current_node = hou.pwd()
         output_path_parm = current_node.parm(self.NODE_OUTPUT_PATH_PARM)
         geometry_node_name = 'geometry_' + current_node.name()
@@ -341,20 +338,16 @@ class TkGeometryNodeHandler(object):
         # move it away from the origin
         geometry_node.moveToGoodPosition()
 
-
     # get labels for all tk-houdini-geometry node output profiles
     def get_output_profile_menu_labels(self):
-
         menu_labels = []
         for count, output_profile_name in enumerate(self._output_profiles):
             menu_labels.extend([count, output_profile_name])
 
         return menu_labels
 
-
     # returns a list of menu items for the current node
     def get_output_path_menu_items(self):
-
         current_node = hou.pwd()
 
         # attempt to compute the output path and add it as an item in the menu
@@ -370,10 +363,8 @@ class TkGeometryNodeHandler(object):
 
         return menu
 
-
     # apply the selected profile in the session
     def set_profile(self, node=None):
-
         if not node:
             node = hou.pwd()
 
@@ -405,7 +396,6 @@ class TkGeometryNodeHandler(object):
 
     # open a file browser showing the render path of the current node
     def show_in_fs(self):
-
         # retrieve the calling node
         current_node = hou.pwd()
         if not current_node:
@@ -589,13 +579,11 @@ class TkGeometryNodeHandler(object):
         return output_cache_template
 
 
-
     ############################################################################
     # Private methods
 
     # compute the output path based on the current work file and backup template
     def _compute_backup_output_path(self, node):
-
         # get relevant fields from the current file path
         work_file_fields = self._get_hipfile_fields()
 
@@ -671,7 +659,6 @@ class TkGeometryNodeHandler(object):
 
     # get the current output profile
     def _get_output_profile(self, node=None):
-
         if not node:
             node = hou.pwd()
 
@@ -682,7 +669,6 @@ class TkGeometryNodeHandler(object):
 
         return output_profile
             
-
     # extract fields from current Houdini file using the workfile template
     def _get_hipfile_fields(self):
         work_file_path = ''
@@ -704,17 +690,14 @@ class TkGeometryNodeHandler(object):
 
         return work_fields
 
-
     # get the render path from current item in the output path parm menu
     def _get_render_path(self, node):
         output_parm = node.parm(self.NODE_OUTPUT_PATH_PARM)
         path = output_parm.menuLabels()[output_parm.eval()]
         return path
 
-
     # returns the files on disk associated with this node
     def _get_rendered_files(self, node):
-
         file_name = self._get_render_path(node)
 
         output_profile = self._get_output_profile(node)
@@ -737,13 +720,11 @@ class TkGeometryNodeHandler(object):
         return self._app.tank.paths_from_template(
             output_cache_template, fields, ["SEQ", "eye"])
 
-
 ################################################################################
 # Utility methods
 
 # Copy all the input connections from this node to the target node.
 def _copy_inputs(source_node, target_node):
-
     input_connections = source_node.inputConnections()
     num_target_inputs = len(target_node.inputConnectors())
 
@@ -757,11 +738,9 @@ def _copy_inputs(source_node, target_node):
         target_node.setInput(connection.inputIndex(),
             connection.inputNode())
 
-
 # Copy parameter values of the source node to those of the target node if a
 # parameter with the same name exists.
 def _copy_parm_values(source_node, target_node, excludes=None):
-
     if not excludes:
         excludes = []
 
@@ -809,7 +788,6 @@ def _copy_parm_values(source_node, target_node, excludes=None):
                     else:
                         raise
 
-
 # return the menu label for the supplied parameter
 def _get_output_menu_label(parm):
     if parm.menuItems()[parm.eval()] == "sgtk":
@@ -819,19 +797,15 @@ def _get_output_menu_label(parm):
         # output path from menu label
         return parm.menuItems()[parm.eval()] 
 
-
 # move all the output connections from the source node to the target node
 def _move_outputs(source_node, target_node):
-
     for connection in source_node.outputConnections():
         output_node = connection.outputNode()
         output_node.setInput(connection.inputIndex(), target_node)
 
-
 # saves output connections into user data of target node. Needed when target
 # node doesn't have outputs.
 def _save_outputs_to_user_data(source_node, target_node):
-
     output_connections = source_node.outputConnections()
     if not output_connections:
         return
@@ -855,10 +829,8 @@ def _save_outputs_to_user_data(source_node, target_node):
     # set the encoded data string on the input node
     target_node.setUserData(handler_cls.TK_OUTPUT_CONNECTIONS_KEY, data_str)
 
-
 # restore output connections from this node to the target node.
 def _restore_outputs_from_user_data(source_node, target_node):
-
     data_str = source_node.userData(
         TkGeometryNodeHandler.TK_OUTPUT_CONNECTIONS_KEY)
 
@@ -884,4 +856,3 @@ def _restore_outputs_from_user_data(source_node, target_node):
     for connection in outputs:
         output_node = hou.node(connection['node'])
         output_node.setInput(connection['input'], target_node)
-
