@@ -680,7 +680,7 @@ class TkGeometryNodeHandler(object):
             if env_hip:
                 work_file_path = env_hip
             else:
-                print 'Could not find origin hip file!'
+                self._app.log_error('Could not find origin hip file!')
 
         work_fields = {}
         work_file_template = self._app.get_template("work_file_template")
