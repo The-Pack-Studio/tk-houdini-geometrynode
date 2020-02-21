@@ -457,6 +457,11 @@ class TkGeometryNodeHandler(object):
         # apply the default profile
         self.set_profile(node)
 
+        # set default range attributes
+        node.parm('trange').set('normal')
+        node.parm('f1').set(hou.text.expandString('$FSTART'))
+        node.parm('f2').set(hou.text.expandString('$FEND'))
+
         try:
             self._app.log_metric("Create", log_version=True)
         except:
