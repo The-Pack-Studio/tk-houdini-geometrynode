@@ -459,6 +459,7 @@ class TkGeometryNodeHandler(object):
 
         # set default range attributes
         node.parm('trange').set('normal')
+        node.parm('trange').pressButton()
         node.parm('f1').set(hou.text.expandString('$FSTART'))
         node.parm('f2').set(hou.text.expandString('$FEND'))
 
@@ -680,6 +681,7 @@ class TkGeometryNodeHandler(object):
         if hou.isUIAvailable():
             work_file_path = hou.hipFile.path()
         # Exeption for when we are on the render farm and using the backup hip
+        # TODO put this environment variable in info.yml, hardcoded here
         else:
             env_hip = os.getenv('NOZ_HIPFILE')
             if env_hip:
