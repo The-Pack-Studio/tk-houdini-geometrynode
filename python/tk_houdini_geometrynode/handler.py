@@ -275,8 +275,10 @@ class TkGeometryNodeHandler(object):
         """
 
         output_parm = node.parm(cls.NODE_OUTPUT_PATH_PARM)
-        path = hou.text.expandString(output_parm.menuLabels()[output_parm.eval()])
-        return path
+        if hou.applicationVersion()[0] >= 18:
+            return hou.text.expandString(output_parm.menuLabels()[output_parm.eval()])
+        else:
+            return hou.expandString(output_parm.menuLabels()[output_parm.eval()])
 
     ############################################################################
     # Instance methods
@@ -460,8 +462,13 @@ class TkGeometryNodeHandler(object):
         # set default range attributes
         node.parm('trange').set('normal')
         node.parm('trange').pressButton()
-        node.parm('f1').set(hou.text.expandString('$FSTART'))
-        node.parm('f2').set(hou.text.expandString('$FEND'))
+
+        if hou.applicationVersion()[0] >= 18:
+            node.parm('f1').set(hou.text.expandString('$FSTART'))
+            node.parm('f2').set(hou.text.expandString('$FEND'))
+        else:
+            node.parm('f1').set(hou.expandString('$FSTART'))
+            node.parm('f2').set(hou.expandString('$FEND'))
 
         try:
             self._app.log_metric("Create", log_version=True)
