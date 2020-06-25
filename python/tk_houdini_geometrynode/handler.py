@@ -500,6 +500,39 @@ class TkGeometryNodeHandler(object):
         else:
             self._app.log_warning("Could not find backup hip file for %s" % node.path())
 
+    def auto_publish(self, node):
+        cache_path = self._compute_output_path(node)
+
+        work_file_fields = self._get_hipfile_fields()
+        name = work_file_fields.get("name", None)
+
+        version = node.parm('ver').evalAsInt()
+
+        # copied from tk-multi-publish2 collector file in shotgun config
+        type_parm = node.parm('types')
+        cache_type = type_parm.menuLabels()[type_parm.evalAsInt()]
+        file_type_name = None
+
+        if cache_type == 'vdb':
+            file_type_name = "Vdb Cache"
+        elif cache_type == 'bgeo.sc':
+            file_type_name = "Geo Cache"
+        elif cache_type == 'bgeo':
+            file_type_name = "Geo Cache"
+        elif cache_type == 'obj':
+            file_type_name = "Obj Cache"
+        elif cache_type == 'usd':
+            file_type_name = "Usd Cache"
+        elif cache_type == 'ass':
+            file_type_name = "Ass Cache"
+        elif cache_type == 'abc':
+            file_type_name = "Alembic Cache"
+
+        if file_type_name:
+            sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, name, published_file_type_name=file_type_name, version_number=version)
+        else:
+            self._app.log_error('Could not find the cache_type in auto_publish function!')
+
     def auto_version(self, node):
         # get relevant fields from the current file path
         work_file_fields = self._get_hipfile_fields()
