@@ -503,9 +503,6 @@ class TkGeometryNodeHandler(object):
     def auto_publish(self, node):
         cache_path = self._compute_output_path(node)
 
-        work_file_fields = self._get_hipfile_fields()
-        name = work_file_fields.get("name", None)
-
         version = node.parm('ver').evalAsInt()
 
         # copied from tk-multi-publish2 collector file in shotgun config
@@ -529,7 +526,7 @@ class TkGeometryNodeHandler(object):
             file_type_name = "Alembic Cache"
 
         if file_type_name:
-            sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, name, published_file_type_name=file_type_name, version_number=version)
+            sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, node.name(), published_file_type=file_type_name, version_number=version)
         else:
             self._app.log_error('Could not find the cache_type in auto_publish function!')
 
