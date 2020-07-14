@@ -510,20 +510,12 @@ class TkGeometryNodeHandler(object):
         cache_type = type_parm.menuLabels()[type_parm.evalAsInt()]
         file_type_name = None
 
-        if cache_type == 'vdb':
-            file_type_name = "Vdb Cache"
-        elif cache_type == 'bgeo.sc':
-            file_type_name = "Geo Cache"
-        elif cache_type == 'bgeo':
-            file_type_name = "Geo Cache"
-        elif cache_type == 'obj':
-            file_type_name = "Obj Cache"
-        elif cache_type == 'usd':
-            file_type_name = "Usd Cache"
-        elif cache_type == 'ass':
-            file_type_name = "Ass Cache"
+        if cache_type == 'bgeo.sc':
+            file_type_name = "Bgeo Cache"
         elif cache_type == 'abc':
             file_type_name = "Alembic Cache"
+        else:
+            file_type_name = "{} Cache".format(cache_type.title())
 
         if file_type_name:
             sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, node.name(), published_file_type=file_type_name, version_number=version)
