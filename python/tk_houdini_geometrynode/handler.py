@@ -501,8 +501,8 @@ class TkGeometryNodeHandler(object):
             self._app.log_warning("Could not find backup hip file for %s" % node.path())
 
     def auto_publish(self, node):
+        # Publish cache
         cache_path = self._compute_output_path(node)
-
         version = node.parm('ver').evalAsInt()
 
         # copied from tk-multi-publish2 collector file in shotgun config
@@ -529,6 +529,10 @@ class TkGeometryNodeHandler(object):
             sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, node.name(), published_file_type=file_type_name, version_number=version)
         else:
             self._app.log_error('Could not find the cache_type in auto_publish function!')
+
+        # Publish backup hip file
+        backup_path = self._compute_backup_output_path(node)
+        sgtk.util.register_publish(self._app.sgtk, self._app.context, backup_path, node.name(), published_file_type="Backup File", version_number=version)
 
     def auto_version(self, node):
         # get relevant fields from the current file path
