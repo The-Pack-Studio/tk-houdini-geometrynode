@@ -1,3 +1,6 @@
+# backup otl files
+*bak*.otl
+
 *.py[cod]
 
 # C extensions
