@@ -470,6 +470,9 @@ class TkGeometryNodeHandler(object):
             node.parm('f1').set(hou.expandString('$FSTART'))
             node.parm('f2').set(hou.expandString('$FEND'))
 
+        # enable auto versioning
+        node.parm('auto_ver').set(1)
+
         try:
             self._app.log_metric("Create", log_version=True)
         except:
