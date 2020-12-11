@@ -567,7 +567,6 @@ class TkGeometryNodeHandler(object):
         fields = {
             "name": work_file_fields.get("name", None),
             "node": node.name(),
-            "ext": extension,
             "SEQ": "FORMAT: $F"
         }
 
