@@ -501,31 +501,56 @@ class TkGeometryNodeHandler(object):
             self._app.log_warning("Could not find backup hip file for %s" % node.path())
 
     def auto_publish(self, node):
-        version = node.parm('ver').evalAsInt()
-
-        # Publish backup hip file
-        backup_path = self._compute_backup_output_path(node)
-        sgtk.util.register_publish(self._app.sgtk, self._app.context, backup_path, node.name(), published_file_type="Backup File", version_number=version)
-
-        # Publish cache
+        # cache that we are publishing
         cache_path = self._compute_output_path(node)
 
-        # copied from tk-multi-publish2 collector file in shotgun config
-        type_parm = node.parm('types')
-        cache_type = type_parm.menuLabels()[type_parm.evalAsInt()]
-        file_type_name = None
+        # check if it already exists
+        publishes = sgtk.util.find_publish(self._app.sgtk, [cache_path])
+        if len(publishes.keys()) == 0:
+            # get caches in scene, same as in tk-multi-breakdown
+            refs = []
 
-        if cache_type == 'bgeo.sc':
-            file_type_name = "Bgeo Cache"
-        elif cache_type == 'abc':
-            file_type_name = "Alembic Cache"
-        else:
-            file_type_name = "{} Cache".format(cache_type.title())
+            for n in hou.node("/obj").allSubChildren(recurse_in_locked_nodes=False):
+                hou_path = None
+                node_type = n.type().name()
+                if node_type == "alembicarchive":
+                    hou_path = n.parm("fileName").eval().replace("/", os.path.sep)
+                elif node_type == "abc_cam":
+                    hou_path = n.parm("abcFile").eval().replace("/", os.path.sep)
+                elif node_type == "sgtk_file" and n.parm('mode').evalAsString() == 'file':
+                    hou_path = n.parm("file").eval().replace("/", os.path.sep)
+                elif node_type == 'arnold_procedural':
+                    hou_path = n.parm("ar_filename").eval().replace("/", os.path.sep)
 
-        if file_type_name:
-            sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, node.name(), published_file_type=file_type_name, version_number=version, dependency_paths=[backup_path])
+                if hou_path:
+                    refs.append(hou_path)
+
+            #get current version
+            version = node.parm('ver').evalAsInt()
+
+            # Publish backup hip file
+            backup_path = self._compute_backup_output_path(node)
+            sgtk.util.register_publish(self._app.sgtk, self._app.context, backup_path, node.name(), published_file_type="Backup File", version_number=version, dependency_paths=refs)
+
+            # Publish cache
+            # copied from tk-multi-publish2 collector file in shotgun config
+            type_parm = node.parm('types')
+            cache_type = type_parm.menuLabels()[type_parm.evalAsInt()]
+
+            file_type_name = None
+            if cache_type == 'bgeo.sc':
+                file_type_name = "Bgeo Cache"
+            elif cache_type == 'abc':
+                file_type_name = "Alembic Cache"
+            else:
+                file_type_name = "{} Cache".format(cache_type.title())
+
+            if file_type_name:
+                sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, node.name(), published_file_type=file_type_name, version_number=version, dependency_paths=[backup_path])
+            else:
+                self._app.log_error('Could not find the cache_type in auto_publish function!')
         else:
-            self._app.log_error('Could not find the cache_type in auto_publish function!')
+            self._app.log_info('Trying to register cache that already exists!')
 
     def auto_version(self, node):
         # get relevant fields from the current file path
