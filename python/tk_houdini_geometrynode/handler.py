@@ -607,7 +607,7 @@ class TkGeometryNodeHandler(object):
 
                 if seq:
                     if seq.missing():
-                        return_str = '[%s-%s], missing %s' % (seq.format('%s'), seq.format('%e'), seq.format('%m'))
+                        return_str = '[%s-%s], missing %s' % (seq.format('%s'), seq.format('%e'), seq.format('%M'))
                     else:
                         return_str = seq.format('%R')
 
@@ -635,6 +635,14 @@ class TkGeometryNodeHandler(object):
                 node_color = hou.Color((0.8, 0, 0))
             else:
                 return_str = 'No Cache!'
+
+        # update shotgun file node as well
+        null_node = hou.node(node.parm('soppath').evalAsString())
+        if null_node:
+            for file_node in null_node.outputs():
+                if file_node.type().name() == 'sgtk_file' and file_node.parm('mode').evalAsString() == 'out' and file_node.parm('rop').evalAsString() == node.path() and file_node.parm('overver').evalAsInt() == 0:
+                    file_node.parm('seqlabel').set(return_str)
+
 
         node.setColor(node_color)
         node.parm('seqlabel').set(return_str)
