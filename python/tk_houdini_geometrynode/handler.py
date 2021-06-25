@@ -464,8 +464,8 @@ class TkGeometryNodeHandler(object):
         node.parm('trange').pressButton()
 
         if hou.applicationVersion()[0] >= 18:
-            node.parm('f1').set(hou.text.expandString('$FSTART'))
-            node.parm('f2').set(hou.text.expandString('$FEND'))
+            node.parm('f1').setExpression('$NOZSTART', hou.exprLanguage.Hscript)
+            node.parm('f2').setExpression('$NOZEND', hou.exprLanguage.Hscript)
         else:
             node.parm('f1').set(hou.expandString('$FSTART'))
             node.parm('f2').set(hou.expandString('$FEND'))
