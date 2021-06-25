@@ -636,13 +636,10 @@ class TkGeometryNodeHandler(object):
             else:
                 return_str = 'No Cache!'
 
-        # update shotgun file node as well
-        null_node = hou.node(node.parm('soppath').evalAsString())
-        if null_node:
-            for file_node in null_node.outputs():
-                if file_node.type().name() == 'sgtk_file' and file_node.parm('mode').evalAsString() == 'out' and file_node.parm('rop').evalAsString() == node.path() and file_node.parm('overver').evalAsInt() == 0:
-                    file_node.parm('seqlabel').set(return_str)
-
+        # update shotgun files node as well
+        for file_node in node.dependents(include_children=False):
+            if file_node.type().name() == 'sgtk_file' and file_node.parm('mode').evalAsString() == 'out' and file_node.parm('rop').evalAsString() == node.path() and file_node.parm('overver').evalAsInt() == 0:
+                file_node.parm('seqlabel').set(return_str)
 
         node.setColor(node_color)
         node.parm('seqlabel').set(return_str)
