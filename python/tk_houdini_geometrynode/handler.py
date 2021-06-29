@@ -528,12 +528,12 @@ class TkGeometryNodeHandler(object):
                 if hou_path:
                     refs.append(hou_path)
 
-            #get current version
+            # get current version
             version = node.parm('ver').evalAsInt()
 
             # Publish backup hip file
             backup_path = self._compute_backup_output_path(node)
-            sgtk.util.register_publish(self._app.sgtk, self._app.context, backup_path, node.name(), published_file_type="Backup File", version_number=version, dependency_paths=refs)
+            sgtk.util.register_publish(self._app.sgtk, self._app.context, backup_path, node.name(), published_file_type="Backup File", version_number=version, dependency_paths=refs, created_by=self._app.context.user)
 
             # Publish cache
             # copied from tk-multi-publish2 collector file in shotgun config
@@ -549,7 +549,7 @@ class TkGeometryNodeHandler(object):
                 file_type_name = "{} Cache".format(cache_type.title())
 
             if file_type_name:
-                sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, node.name(), published_file_type=file_type_name, version_number=version, dependency_paths=[backup_path])
+                sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, node.name(), published_file_type=file_type_name, version_number=version, dependency_paths=[backup_path], created_by=self._app.context.user)
             else:
                 self._app.log_error('Could not find the cache_type in auto_publish function!')
         else:
