@@ -570,7 +570,8 @@ class TkGeometryNodeHandler(object):
         fields = {
             "name": work_file_fields.get("name", None),
             "node": node.name(),
-            "SEQ": "FORMAT: $F"
+            "SEQ": "FORMAT: $F",
+            "ext": extension
         }
 
         fields.update(self._app.context.as_template_fields(
