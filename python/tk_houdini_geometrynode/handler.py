@@ -708,7 +708,8 @@ class TkGeometryNodeHandler(object):
             "version": node.parm('ver').evalAsInt(),
             "ext": extension,
             "SEQ": "FORMAT: $F",
-            "output_profile": self._get_output_profile(node)
+            "output_profile": self._get_output_profile(node),
+            "hipfile": hou.hipFile.path()
         }
 
         # cache fields to accelerate path creation
