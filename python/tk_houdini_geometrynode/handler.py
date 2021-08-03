@@ -719,6 +719,13 @@ class TkGeometryNodeHandler(object):
         else:
             return node.cachedUserData('pathCache')
 
+        # remove underscores or minus in node and create camelcase name
+        node_name = fields['node'].replace("-", " ").replace("_", " ")
+        node_name = node_name.split()
+        
+        fields['node'] = node_name[0] + ''.join(i.capitalize() for i in node_name[1:])
+
+        # get template
         output_cache_template = self._app.get_template_by_name(
                         fields["output_profile"]["output_cache_template"])
 
