@@ -533,7 +533,7 @@ class TkGeometryNodeHandler(object):
 
             # Publish backup hip file
             backup_path = self._compute_backup_output_path(node)
-            sgtk.util.register_publish(self._app.sgtk, self._app.context, backup_path, node.name(), published_file_type="Backup File", version_number=version, dependency_paths=refs, created_by=self._app.context.user)
+            sgtk.util.register_publish(self._app.sgtk, self._app.context, backup_path, self._getNodeName(node), published_file_type="Backup File", version_number=version, dependency_paths=refs, created_by=self._app.context.user)
 
             # Publish cache
             # copied from tk-multi-publish2 collector file in shotgun config
@@ -549,7 +549,7 @@ class TkGeometryNodeHandler(object):
                 file_type_name = "{} Cache".format(cache_type.title())
 
             if file_type_name:
-                sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, node.name(), published_file_type=file_type_name, version_number=version, dependency_paths=[backup_path], created_by=self._app.context.user)
+                sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, self._getNodeName(node), published_file_type=file_type_name, version_number=version, dependency_paths=[backup_path], created_by=self._app.context.user)
             else:
                 self._app.log_error('Could not find the cache_type in auto_publish function!')
         else:
@@ -569,7 +569,7 @@ class TkGeometryNodeHandler(object):
 
         fields = {
             "name": work_file_fields.get("name", None),
-            "node": node.name(),
+            "node": self._getNodeName(node),
             "SEQ": "FORMAT: $F",
             "ext": extension
         }
@@ -655,6 +655,14 @@ class TkGeometryNodeHandler(object):
     ############################################################################
     # Private methods
 
+    # remove underscores or minus in node and create camelcase name
+    def _getNodeName(self, node):
+        name = node.name()
+        name = name.replace("-", " ").replace("_", " ")
+        name = name.split()
+        
+        return name[0] + ''.join(i.capitalize() for i in name[1:])
+
     # compute the output path based on the current work file and backup template
     def _compute_backup_output_path(self, node):
         # get relevant fields from the current file path
@@ -671,7 +679,7 @@ class TkGeometryNodeHandler(object):
         # create fields dict with all the metadata
         fields = {
             "name": work_file_fields.get("name", None),
-            "node": node.name(),
+            "node": self._getNodeName(node),
             "version": node.parm('ver').evalAsInt(),
             "ext": extension,
         }
@@ -704,7 +712,7 @@ class TkGeometryNodeHandler(object):
         # create fields dict with all the metadata
         fields = {
             "name": work_file_fields.get("name", None),
-            "node": node.name(),
+            "node": self._getNodeName(node),
             "version": node.parm('ver').evalAsInt(),
             "ext": extension,
             "SEQ": "FORMAT: $F",
@@ -718,12 +726,6 @@ class TkGeometryNodeHandler(object):
             node.setCachedUserData('fields', fields.copy())
         else:
             return node.cachedUserData('pathCache')
-
-        # remove underscores or minus in node and create camelcase name
-        node_name = fields['node'].replace("-", " ").replace("_", " ")
-        node_name = node_name.split()
-        
-        fields['node'] = node_name[0] + ''.join(i.capitalize() for i in node_name[1:])
 
         # get template
         output_cache_template = self._app.get_template_by_name(
