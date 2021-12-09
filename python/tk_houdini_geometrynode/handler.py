@@ -545,6 +545,8 @@ class TkGeometryNodeHandler(object):
                 file_type_name = "Bgeo Cache"
             elif cache_type == 'abc':
                 file_type_name = "Alembic Cache"
+            elif cache_type == 'exr':
+                file_type_name = "Texture"
             else:
                 file_type_name = "{} Cache".format(cache_type.title())
 
