@@ -363,6 +363,9 @@ class TkGeometryNodeHandler(object):
             menu_str = "ERROR: %s" % error_msg
             menu = [menu_str, menu_str]
 
+        if hou.isUIAvailable():
+            current_node.parm('sopoutput_child').set(path)
+
         return menu
 
     # apply the selected profile in the session
