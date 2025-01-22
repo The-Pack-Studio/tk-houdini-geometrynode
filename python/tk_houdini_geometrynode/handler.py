@@ -275,10 +275,12 @@ class TkGeometryNodeHandler(object):
         """
 
         output_parm = node.parm(cls.NODE_OUTPUT_PATH_PARM)
-        if hou.applicationVersion()[0] >= 18:
-            return hou.text.expandString(output_parm.menuLabels()[output_parm.eval()])
-        else:
-            return hou.expandString(output_parm.menuLabels()[output_parm.eval()])
+        output_path = output_parm.evalAsString()
+        output_path = output_path.replace("$F4", "%04d")
+
+
+        return output_path
+
 
     ############################################################################
     # Instance methods
