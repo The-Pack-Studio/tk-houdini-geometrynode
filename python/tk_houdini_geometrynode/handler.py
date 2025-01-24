@@ -74,6 +74,10 @@ class TkGeometryNodeHandler(object):
     TK_OUTPUT_PROFILE_NAME_KEY = "tk_output_profile_name"
     """The key in the user data that stores the output profile name."""
 
+    TK_USD_PRIM_PREFIX_PATH = "prim_prefix_path"
+    # the prefix of the prim path
+
+    TK_USD_PRIM_PATH = "prim_path"
 
     ############################################################################
     # Class methods
@@ -478,11 +482,25 @@ class TkGeometryNodeHandler(object):
         # enable auto versioning
         node.parm('auto_ver').set(1)
 
+        self.reset_usd_prim_path(node)
+
         try:
             self._app.log_metric("Create", log_version=True)
         except:
             # ingore any errors. ex: metrics logging not supported
             pass
+
+
+    def reset_usd_prim_path(self, node):
+
+        prim_prefix_path = node.parm(self.TK_USD_PRIM_PREFIX_PATH).eval()
+        out_node_name = node.name()
+
+        prim_path = "{}/{}".format(prim_prefix_path, out_node_name)
+
+        prim_path_parm = node.parm(self.TK_USD_PRIM_PATH)
+        prim_path_parm.set(prim_path)
+
 
     # write backup file
     def create_backup_file(self, node):
