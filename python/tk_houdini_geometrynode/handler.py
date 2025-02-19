@@ -556,7 +556,14 @@ class TkGeometryNodeHandler(object):
 
             # Publish backup hip file
             backup_path = self._compute_backup_output_path(node)
-            sgtk.util.register_publish(self._app.sgtk, self._app.context, backup_path, self._getNodeName(node), published_file_type="Backup File", version_number=version, dependency_paths=refs, created_by=self._app.context.user)
+            sgtk.util.register_publish( self._app.sgtk,
+                                        self._app.context,
+                                        backup_path,
+                                        self._compute_publish_name(node),
+                                        published_file_type="Backup File",
+                                        version_number=version,
+                                        dependency_paths=refs,
+                                        created_by=self._app.context.user)
 
             # Publish cache
             # copied from tk-multi-publish2 collector file in shotgun config
@@ -574,7 +581,14 @@ class TkGeometryNodeHandler(object):
                 file_type_name = "{} Cache".format(cache_type.title())
 
             if file_type_name:
-                sgtk.util.register_publish(self._app.sgtk, self._app.context, cache_path, self._getNodeName(node), published_file_type=file_type_name, version_number=version, dependency_paths=[backup_path], created_by=self._app.context.user)
+                sgtk.util.register_publish( self._app.sgtk,
+                                            self._app.context,
+                                            cache_path,
+                                            self._compute_publish_name(node),
+                                            published_file_type=file_type_name,
+                                            version_number=version,
+                                            dependency_paths=[backup_path],
+                                            created_by=self._app.context.user)
             else:
                 self._app.log_error('Could not find the cache_type in auto_publish function!')
         else:
@@ -687,6 +701,21 @@ class TkGeometryNodeHandler(object):
         name = name.split()
         
         return name[0] + ''.join(i.capitalize() for i in name[1:])
+
+
+    def _compute_publish_name(self, node):
+        '''
+        Creates a publish name that will be used in the "name" field of the publish on Shotgrid
+        The publish name is composed of the name of the hip scene (if it exists) and the name of the hou node
+        '''
+        work_file_fields = self._get_hipfile_fields()
+        if not work_file_fields:
+            msg = "This Houdini file is not a Shotgun Toolkit work file!"
+            raise sgtk.TankError(msg)
+        scene_name_field = work_file_fields.get("name")
+
+        return "_".join(filter(None, [self._getNodeName(node), scene_name_field]))
+
 
     # compute the output path based on the current work file and backup template
     def _compute_backup_output_path(self, node):
