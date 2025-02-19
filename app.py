@@ -111,3 +111,8 @@ class TkGeometryNodeApp(sgtk.platform.Application):
         """
 
         return self.get_template("work_file_template")
+
+
+    def get_publish_name(self, node):
+
+        return self.handler.compute_publish_name(node)

@@ -559,7 +559,7 @@ class TkGeometryNodeHandler(object):
             sgtk.util.register_publish( self._app.sgtk,
                                         self._app.context,
                                         backup_path,
-                                        self._compute_publish_name(node),
+                                        self.compute_publish_name(node),
                                         published_file_type="Backup File",
                                         version_number=version,
                                         dependency_paths=refs,
@@ -584,7 +584,7 @@ class TkGeometryNodeHandler(object):
                 sgtk.util.register_publish( self._app.sgtk,
                                             self._app.context,
                                             cache_path,
-                                            self._compute_publish_name(node),
+                                            self.compute_publish_name(node),
                                             published_file_type=file_type_name,
                                             version_number=version,
                                             dependency_paths=[backup_path],
@@ -703,7 +703,7 @@ class TkGeometryNodeHandler(object):
         return name[0] + ''.join(i.capitalize() for i in name[1:])
 
 
-    def _compute_publish_name(self, node):
+    def compute_publish_name(self, node):
         '''
         Creates a publish name that will be used in the "name" field of the publish on Shotgrid
         The publish name is composed of the name of the hip scene (if it exists) and the name of the hou node
